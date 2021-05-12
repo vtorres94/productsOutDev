@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Segment, Header, Input, Button, Grid, Icon } from 'semantic-ui-react';
+import { Modal, Segment, Header, Input, Button, Grid, Icon, Label, StrictTransitionGroupProps } from 'semantic-ui-react';
 import { useHistory } from 'react-router-dom';
 import { useFirebaseApp, useUser } from 'reactfire';
 import 'firebase/auth';
@@ -9,7 +9,11 @@ interface ILoginProps{}
 
 interface ILoginState {
     email: string,
-    password: string
+    password: string,
+    emailValid: boolean,
+    passwordValid: boolean,
+    loginValid: boolean,
+    errorMessage: string
 }
 
 const Login = (props: ILoginProps) => {
@@ -20,7 +24,11 @@ const Login = (props: ILoginProps) => {
 
     const [state, setState] = useState<ILoginState>({
         email: '',
-        password: ''
+        password: '',
+        emailValid: true,
+        passwordValid: true,
+        loginValid: true,
+        errorMessage: ''
     })
 
     useEffect(() => {
@@ -30,15 +38,21 @@ const Login = (props: ILoginProps) => {
     }, [user])
 
     const login = async() => {
-        firebase.auth().signInWithEmailAndPassword(state.email, state.password)
-            .then(() => {
-                console.log("Se inicio sesion: " + user.data.email);
-            })
-            .catch((error) => {
-                console.log("Falló al iniciar sesión "+ error );
-            })
+        let emailValid;
+        let passwordValid;
+        emailValid = state.email !== '' ? true : false
+        passwordValid = state.password !== '' ? true : false
+        if(emailValid && passwordValid) {
+            firebase.auth().signInWithEmailAndPassword(state.email, state.password)
+                .then(() => {
+                    console.log("Se inicio sesion: " + user.data.email);
+                })
+                .catch((error) => {
+                    setState({...state, loginValid: false, errorMessage: error.message})
+                })
+        }
+        setState({ ...state, emailValid: emailValid, passwordValid: passwordValid })
     }
-
 
     return(
         <Modal 
@@ -47,6 +61,9 @@ const Login = (props: ILoginProps) => {
             onClose={() => history.push("/")}
             open={!user.data}
             size="tiny"
+            closeOnEscape
+            closeOnDimmerClick
+            closeOnTriggerBlur
         >
             <Modal.Header>Products <Icon name="product hunt"/></Modal.Header>
             <Segment textAlign="center">
@@ -56,14 +73,56 @@ const Login = (props: ILoginProps) => {
                 <Grid columns={1}>
                     <Grid.Row>
                         <Grid.Column>
-                        <Input icon="user" placeholder="email" value={state.email} onChange={event => setState({...state, email: event.target.value})}/>
+                        <Input
+                            icon="user"
+                            placeholder="email"
+                            value={state.email}
+                            onChange={event => setState({
+                                ...state, 
+                                email: event.target.value,
+                                emailValid: event.target.value !== '' ? true : false,
+                                loginValid: true
+                            })}
+                        />
                         </Grid.Column>
                     </Grid.Row>
+                    {!state.emailValid ? (
+                    <Grid.Row>
+                          <Label basic color="red" pointing="above" attached="bottom">
+                            Field required
+                          </Label>
+                    </Grid.Row>
+                    ) : null}
                     <Grid.Row>
                         <Grid.Column>
-                            <Input icon="key" placeholder="password" type="password" value={state.password} onChange={event => setState({...state, password: event.target.value})}/>
+                            <Input 
+                                icon="key" 
+                                placeholder="password" 
+                                type="password" 
+                                value={state.password} 
+                                onChange={event => setState({
+                                    ...state, 
+                                    password: event.target.value,
+                                    passwordValid: event.target.value !== '' ? true : false,
+                                    loginValid: true
+                                })}
+                            />
                         </Grid.Column>
                     </Grid.Row>
+                    {!state.passwordValid ? (
+                    <Grid.Row>
+                          <Label basic color="red" pointing="above" attached="bottom">
+                            Field required
+                          </Label>
+                    </Grid.Row>
+                    ) : null}
+                    {!state.loginValid && state.emailValid && state.passwordValid ? (
+                    <Grid.Row>
+                        <Label basic color="red" attached="bottom">
+                            {state.errorMessage}
+                          </Label>
+                    </Grid.Row>
+                    ) : null}
                     <Grid.Row>
                         <Grid.Column>
                             <a href="/password-recovery">Forgot the password?</a>

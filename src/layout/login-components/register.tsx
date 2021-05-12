@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Modal, Segment, Header, Input, Button, Grid, Icon } from 'semantic-ui-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { Modal, Segment, Header, Input, Button, Grid, Icon, Label } from 'semantic-ui-react';
+import { useHistory } from 'react-router-dom';
 import { useFirebaseApp, useUser } from 'reactfire';
 import 'firebase/auth';
 
-interface IRegisterProps extends RouteComponentProps<{ url: string }> {}
+interface IRegisterProps {}
 
 interface IRegisterState {
     email: string,
@@ -12,7 +12,9 @@ interface IRegisterState {
     confirmPassword: string,
     validEmail: boolean,
     validPassword: boolean,
-    validConfirmPassword: boolean
+    validConfirmPassword: boolean,
+    validSignin: boolean,
+    errorMessage: string
 }
 const Register = (props: IRegisterProps) => {
     const [state, setState] = useState<IRegisterState>({
@@ -21,27 +23,37 @@ const Register = (props: IRegisterProps) => {
         confirmPassword: '',
         validEmail: true,
         validPassword: true,
-        validConfirmPassword: true
+        validConfirmPassword: true,
+        validSignin: true,
+        errorMessage: ''
     });
     const firebase = useFirebaseApp();
     const user = useUser();
+    const history = useHistory();
 
-    const validateFields = () => {
+    const signIn = () => {
+        let validEmail;
+        let validPassword;
+        let validConfirmPassword;
+        validEmail= state.email !== '' ? true : false
+        validPassword= state.password !== '' && state.password.length >= 8 ? true : false
+        validConfirmPassword= state.password === state.confirmPassword ? true : false 
+
+        if(validEmail && validPassword && validConfirmPassword) {
+            firebase.auth().createUserWithEmailAndPassword(state.email, state.password)
+                .then(response => {
+                    history.push("/");
+                })
+                .catch((error) => {
+                    setState({ ...state, validSignin: false, errorMessage: error.message })
+                })
+        }
         setState({
             ...state,
-            validEmail: state.email !== '' ? true : false,
-            validPassword: state.password !== '' && state.password.length >6 ? true : false,
-            validConfirmPassword: state.password === state.confirmPassword ? true : false 
+            validEmail: validEmail,
+            validPassword: validPassword,
+            validConfirmPassword: validConfirmPassword 
         })
-    }
-    
-    const signIn = () => {
-        validateFields();
-        const { validEmail, validPassword, validConfirmPassword } = state;
-        console.log("Signin"+ validEmail + validPassword + validConfirmPassword)
-        if(validEmail && validPassword && validConfirmPassword) {
-            firebase.auth().createUserWithEmailAndPassword(state.email, state.password);
-        }
     }
 
 
@@ -50,8 +62,11 @@ const Register = (props: IRegisterProps) => {
             open={!user.data}
             textAllign="center" 
             closeIcon
-            onClose={() => props.history.push("/")}
+            onClose={() => history.push("/")}
             closeOnEscape
+            size="tiny"
+            closeOnDimmerClick
+            closeOnTriggerBlur
         >
             <Modal.Header>Products <Icon name="product hunt"/></Modal.Header>
             <Segment textAlign="center">
@@ -61,17 +76,81 @@ const Register = (props: IRegisterProps) => {
                 <Grid columns={1}>
                     <Grid.Row>
                         <Grid.Column>
-                        <Input icon="user" placeholder="email" onChange={event => setState({ ...state, email:event.target.value })}/>
+                        <Input 
+                            icon="user"
+                            placeholder="email" 
+                            onChange={event => 
+                                setState({ 
+                                    ...state, 
+                                    email:event.target.value,
+                                    validEmail: event.target.value !== '' ? true : false,
+                                    validSignin: true
+                                })
+                            }
+                        />
                         </Grid.Column>
                     </Grid.Row>
+                    {!state.validEmail ? (
+                    <Grid.Row>
+                          <Label basic color="red" pointing="above" attached="bottom">
+                            Field required
+                          </Label>
+                    </Grid.Row>
+                    ) : null}
                     <Grid.Row>
                         <Grid.Column>
-                            <Input icon="key" placeholder="password" type="password" onChange={event => setState({ ...state, password:event.target.value })}/>
+                            <Input 
+                                icon="key" 
+                                placeholder="password" 
+                                type="password" 
+                                onChange={event => setState({ 
+                                    ...state, 
+                                    password: event.target.value,
+                                    validPassword: event.target.value !== '' ? true : false,
+                                    validSignin: true
+                                })}
+                            />
                         </Grid.Column>
                     </Grid.Row>
+                    {!state.validPassword ? (
+                    <Grid.Row>
+                          <Label basic color="red" pointing="above" attached="bottom">
+                            Field need 8 characters
+                          </Label>
+                    </Grid.Row>
+                    ) : null}
                     <Grid.Row>
                         <Grid.Column>
-                            <Input icon="key" placeholder="confirm" type="password" onChange={event => setState({ ...state, confirmPassword:event.target.value })}/>
+                            <Input 
+                                icon="key" 
+                                placeholder="confirm" 
+                                type="password" 
+                                onChange={event => setState({ 
+                                    ...state, 
+                                    confirmPassword: event.target.value,
+                                    validConfirmPassword: event.target.value === state.password ? true : false,
+                                    validSignin: true
+                                })}
+                            />
+                        </Grid.Column>
+                    </Grid.Row>
+                    {!state.validConfirmPassword ? (
+                    <Grid.Row>
+                          <Label basic color="red" pointing="above" attached="bottom">
+                            Passwords are diferents
+                          </Label>
+                    </Grid.Row>
+                    ) : null}
+                    {!state.validSignin && state.validEmail && state.validPassword && state.validConfirmPassword ? (
+                    <Grid.Row>
+                        <Label basic color="red" pointing="above" attached="bottom">
+                            {state.errorMessage}
+                        </Label>
+                    </Grid.Row>
+                    ) : null}
+                    <Grid.Row>
+                        <Grid.Column>
+                            <a href="/login">Have any account? Login</a>
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row>
