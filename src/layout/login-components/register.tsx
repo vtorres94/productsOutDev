@@ -3,6 +3,7 @@ import { Modal, Segment, Header, Input, Button, Grid, Icon, Label } from 'semant
 import { useHistory } from 'react-router-dom';
 import { useFirebaseApp, useUser } from 'reactfire';
 import 'firebase/auth';
+import { ToastContainer, toast } from 'react-toastify';
 
 interface IRegisterProps {}
 
@@ -42,7 +43,7 @@ const Register = (props: IRegisterProps) => {
         if(validEmail && validPassword && validConfirmPassword) {
             firebase.auth().createUserWithEmailAndPassword(state.email, state.password)
                 .then(response => {
-                    history.push("/");
+                    notify();
                 })
                 .catch((error) => {
                     setState({ ...state, validSignin: false, errorMessage: error.message })
@@ -56,6 +57,10 @@ const Register = (props: IRegisterProps) => {
         })
     }
 
+    const notify = () => {
+        toast("Registered user successfully!")
+        // history.push("/");
+    }
 
     return(
         <Modal 
@@ -68,7 +73,7 @@ const Register = (props: IRegisterProps) => {
             closeOnDimmerClick
             closeOnTriggerBlur
         >
-            <Modal.Header>Products <Icon name="product hunt"/></Modal.Header>
+            <Modal.Header>Products <Icon name="product hunt"/><ToastContainer /></Modal.Header>
             <Segment textAlign="center">
                 <Header>
                     <Header.Content>Register</Header.Content>
@@ -76,18 +81,19 @@ const Register = (props: IRegisterProps) => {
                 <Grid columns={1}>
                     <Grid.Row>
                         <Grid.Column>
-                        <Input 
-                            icon="user"
-                            placeholder="email" 
-                            onChange={event => 
-                                setState({ 
-                                    ...state, 
-                                    email:event.target.value,
-                                    validEmail: event.target.value !== '' ? true : false,
-                                    validSignin: true
-                                })
-                            }
-                        />
+                            <Input 
+                                name="user"
+                                icon="user"
+                                placeholder="email" 
+                                onChange={event => 
+                                    setState({ 
+                                        ...state, 
+                                        email:event.target.value,
+                                        validEmail: event.target.value !== '' ? true : false,
+                                        validSignin: true
+                                    })
+                                }
+                            />
                         </Grid.Column>
                     </Grid.Row>
                     {!state.validEmail ? (
@@ -100,6 +106,7 @@ const Register = (props: IRegisterProps) => {
                     <Grid.Row>
                         <Grid.Column>
                             <Input 
+                                name="password"
                                 icon="key" 
                                 placeholder="password" 
                                 type="password" 

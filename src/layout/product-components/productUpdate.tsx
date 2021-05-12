@@ -11,6 +11,7 @@ import {
 } from "semantic-ui-react";
 import { RouteComponentProps, useHistory } from "react-router-dom";
 import { useFirebaseApp } from "reactfire";
+import { ToastContainer, toast } from 'react-toastify';
 
 interface IProductUpdateProps extends RouteComponentProps<{ id: string }> {}
 
@@ -22,6 +23,10 @@ interface IProductUpdateState {
   category: string;
   description: string;
   isLoading: boolean;
+  productValid: boolean;
+  descriptionValid: boolean;
+  categoryValid: boolean;
+  imageBase64Valid: boolean;
 }
 
 const ProductUpdate = (props: IProductUpdateProps) => {
@@ -33,6 +38,10 @@ const ProductUpdate = (props: IProductUpdateProps) => {
     category: "",
     description: "",
     isLoading: false,
+    productValid: true,
+    descriptionValid: true,
+    categoryValid: true,
+    imageBase64Valid: true
   });
 
   useEffect(() => {
@@ -59,7 +68,15 @@ const ProductUpdate = (props: IProductUpdateProps) => {
   const firebase = useFirebaseApp();
   const history = useHistory();
 
-  const onSave = async () => {
+  const onSave = () => {
+    let productValid;
+    let categoryValid;
+    let imageBase64Valid;
+    let descriptionValid;
+    productValid = state.product !== '' ? true : false;
+    categoryValid = state.category !== '' ? true : false;
+    descriptionValid = state.description !== '' ? true : false;
+    imageBase64Valid = state.imageBase64 !== '' ? true : false;
     const product = {
       id: state.id,
       product: state.product,
@@ -68,34 +85,36 @@ const ProductUpdate = (props: IProductUpdateProps) => {
       description: state.description,
     };
     const prodRef = firebase.database().ref("products");
-    if (state.isNew) {
-      await prodRef
-        .push(product)
-        .then((response) => {
-          cleanFields();
-          console.log("The product has been created" + response);
-          props.history.push("/");
-        })
-        .catch((error: any) => {
-          console.log(error);
-        });
-    } else {
-      var prod = prodRef.child(props.match.params.id);
-      prod
-        .update({
-          product: state.product,
-          category: state.category,
-          description: state.description,
-          imageBase64: state.imageBase64,
-        })
-        .then((response) => {
-          cleanFields();
-          console.log("The product has been created" + response);
-          props.history.push("/");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    if(productValid && categoryValid && descriptionValid && imageBase64Valid) {
+      if (state.isNew) {
+        prodRef
+          .push(product)
+          .then((response) => {
+            cleanFields();
+            console.log("The product has been created" + response);
+            props.history.push("/");
+          })
+          .catch((error: any) => {
+            console.log(error);
+          });
+      } else {
+        var prod = prodRef.child(props.match.params.id);
+        prod
+          .update({
+            product: state.product,
+            category: state.category,
+            description: state.description,
+            imageBase64: state.imageBase64,
+          })
+          .then((response) => {
+            cleanFields();
+            console.log("The product has been created" + response);
+            props.history.push("/");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }
   };
 
@@ -108,6 +127,10 @@ const ProductUpdate = (props: IProductUpdateProps) => {
       category: "",
       description: "",
       isLoading: false,
+      productValid: true,
+      descriptionValid: true,
+      categoryValid: true,
+      imageBase64Valid: true
     });
   };
 

@@ -73,17 +73,18 @@ const Login = (props: ILoginProps) => {
                 <Grid columns={1}>
                     <Grid.Row>
                         <Grid.Column>
-                        <Input
-                            icon="user"
-                            placeholder="email"
-                            value={state.email}
-                            onChange={event => setState({
-                                ...state, 
-                                email: event.target.value,
-                                emailValid: event.target.value !== '' ? true : false,
-                                loginValid: true
-                            })}
-                        />
+                            <Input
+                                name="user"
+                                icon="user"
+                                placeholder="email"
+                                value={state.email}
+                                onChange={event => setState({
+                                    ...state, 
+                                    email: event.target.value,
+                                    emailValid: event.target.value !== '' ? true : false,
+                                    loginValid: true
+                                })}
+                            />
                         </Grid.Column>
                     </Grid.Row>
                     {!state.emailValid ? (
@@ -96,6 +97,7 @@ const Login = (props: ILoginProps) => {
                     <Grid.Row>
                         <Grid.Column>
                             <Input 
+                                name="password"
                                 icon="key" 
                                 placeholder="password" 
                                 type="password" 
