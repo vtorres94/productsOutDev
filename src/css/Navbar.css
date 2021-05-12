@@ -1,0 +1,125 @@
+.NavbarItems {
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+.navbar-logo {
+    color: black;
+    justify-self: start;
+    cursor: pointer;
+}
+
+.arlogo {
+    margin-left: 0.5rem;
+    font-size: 1.6rem;
+}
+
+.nav-menu {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    grid-gap: 10px;
+    list-style: none;
+    width: 70vw;
+    justify-content: center;
+    background-color: #2ACFFF;
+}
+
+.nav-links {
+    background-color: #2ACFFF;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin-left: 0px;
+    color: white;
+}
+
+.nav-links:hover {
+    color: yellow;
+    border-radius: 4px;
+    transition: all 0.2s ease-out;
+}
+
+.fa-bars {
+    color: black;
+}
+
+.menu-icon {
+    display: none;
+}
+
+.logs {
+    display: none;
+}
+
+.log-button {
+    display: flex;
+    justify-content: center!important;
+    align-items: center;
+    font-size: 1.2rem; 
+}
+
+@media screen and (max-width: 960px) {
+    .NavbarItems {
+        position: relative;
+    }
+
+    .nav-menu {
+        display: none;
+    }
+
+    .logs {
+        display: contents;
+    }
+
+    .nav-menu.active {
+        margin-left: 0;
+        display: flex;
+        flex-direction: column;
+        color: black;
+        background: #2ACFFF;
+        transition: all 0.5s ease;
+        opacity: 3;
+        width: 80vw;
+        position: absolute;
+        padding: 0;
+    }
+
+    .nav-links {
+        text-align: center;
+        padding: 2rem;
+        display: table;
+        width: 100%;
+    }
+
+    .nav-links:hover {
+        background-color: #2ACFFF;
+        border-radius: 0;
+        color: white!important;
+    }
+
+    .navbar-logo {
+        color:black;
+        position: absolute;
+        top: 0;
+        left: -10px;
+        transform: translate(25%, 50%);
+    }
+
+    .menu-icon {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(-100%, 60%);
+        font-size: 1.8rem;
+        cursor: pointer;
+    }
+
+    .log-button {
+        display: none!important;
+    }
+
+    
+}
